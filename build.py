@@ -45,6 +45,6 @@ if __name__ == "__main__":
     if 'CONAN_CHANNEL' in os.environ:
         user_channel = os.environ['CONAN_CHANNEL']
     
-    builder = ConanMultiPackager(build_policy="outdated", upload_retry=3)
+    builder = ConanMultiPackager(build_policy="outdated", upload_retry=3, upload_only_recipe=True)
     builder.add()
     builder.run(os.path.abspath("./ci-profile"))
