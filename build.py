@@ -4,6 +4,7 @@ import os
 
 if __name__ == "__main__":
 
+    os.environ["CONAN_PRINT_RUN_COMMANDS"] = "True"
     os.system("conan profile new ./ci-profile")
     if 'CONAN_BASE_PROFILE_OS' in os.environ:
         os.system("conan profile update settings.os=\"%s\" ./ci-profile" % os.environ['CONAN_BASE_PROFILE_OS'])
@@ -44,6 +45,6 @@ if __name__ == "__main__":
     if 'CONAN_CHANNEL' in os.environ:
         user_channel = os.environ['CONAN_CHANNEL']
     
-    builder = ConanMultiPackager()
+    builder = ConanMultiPackager(build_policy="outdated", upload_retry=3)
     builder.add()
     builder.run(os.path.abspath("./ci-profile"))

@@ -30,12 +30,10 @@ jobs:
   - script: python build.py
     displayName: 'Run build'
     env: {
-      CONAN_PRINT_RUN_COMMANDS: "True",
       CONAN_USERNAME: "tereius",
       CONAN_CHANNEL: "stable",
-      CONAN_BUILD_POLICY: "missing",
       CONAN_REMOTES: "https://api.bintray.com/conan/tereius/public-conan",
-      #CONAN_UPLOAD: "https://api.bintray.com/conan/tereius/public-conan",
+      CONAN_UPLOAD: "https://api.bintray.com/conan/tereius/public-conan",
       CONAN_LOGIN_USERNAME: "tereius",
       CONAN_PASSWORD: "$(secret)",
       CONAN_BASE_PROFILE_OSBUILD: "$(conanBuildOS)",
