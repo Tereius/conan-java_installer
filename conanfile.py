@@ -1,4 +1,8 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from conans import ConanFile, tools
+from conans.errors import ConanException
 import os
 
 
@@ -8,7 +12,7 @@ class JavaInstallerConan(ConanFile):
     url = "https://github.com/bincrafters/conan-java_installer"
     description = "Java installer distributed via Conan"
     license = "https://www.azul.com/products/zulu-and-zulu-enterprise/zulu-terms-of-use/"
-    settings = "os", "arch", "os_build", "arch_build"
+    settings = {"os_build": ["Windows", "Linux", "Macos"], "arch_build": ["x86_64"]}
     options = {"jni": [True, False]}
     default_options = "jni=False"
 
@@ -17,43 +21,22 @@ class JavaInstallerConan(ConanFile):
         folder = {"Linux": "linux", "Macos": "darwin", "Windows": "win32"}.get(self.settings.os_build)
         return os.path.join("include", folder)
 
-    @property
-    def is_cross_build(self):
-        return self.settings.arch_build != self.settings.arch or self.settings.os_build != self.settings.os
-    
-    @property
-    def c_arch(self):
-        if self.is_cross_build:
-            return self.settings.arch_build
-        return self.settings.arch
-    
-    @property
-    def c_os(self):
-        if self.is_cross_build:
-            return self.settings.os_build
-        return self.settings.os
-
-    def config_options(self):
-        if self.c_arch != "x86_64":
-            raise Exception("Unsupported Architecture.  This package currently only supports x86_64.")
-        if self.c_os not in ["Windows", "Macos", "Linux"]:
-            raise Exception("Unsupported System. This package currently only support Linux/Darwin/Windows")
-
     def build(self):
         source_file = "zulu8.23.0.3-jdk{0}-{1}_x64"
-
-        if self.c_os == "Windows":
+        if self.settings.os_build == "Windows":
             source_file = source_file.format(self.version, "win")
             ext = "zip"
             checksum = "85044428c21350a1c2b1aa93d3002c8f"
-        elif self.c_os == "Linux":
+        elif self.settings.os_build == "Linux":
             source_file = source_file.format(self.version, "linux")
             ext = "tar.gz"
             checksum = "6ecd67688407b9f7e45c2736f003398b"
-        elif self.c_os == "Macos":
+        elif self.settings.os_build == "Macos":
             source_file = source_file.format(self.version, "macosx")
             ext = "tar.gz"
             checksum = "a82e78c9cd32deade2d6b44c2bdea133"
+        else:
+            raise ConanException("Unsupported build os: " + self.settings.os_build)
 
         bin_filename = "{0}.{1}".format(source_file, ext)
         download_url = "http://cdn.azul.com/zulu/bin/{0}".format(bin_filename)
@@ -65,9 +48,7 @@ class JavaInstallerConan(ConanFile):
         self.copy(pattern="*", dst=".", src="sources")
         
     def package_id(self):
-        self.info.settings.os = self.c_os
-        self.info.settings.arch = self.c_arch
-        self.info.discard_build_settings()
+        self.info.include_build_settings()
 
     def package_info(self):
 

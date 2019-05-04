@@ -1,0 +1,43 @@
+jobs:
+- job:
+  strategy:
+    matrix:
+      Linux:
+        imageName: "ubuntu-16.04"
+        conanBuildOS: "Linux"
+      Windows:
+        imageName: "windows-2019"
+        conanBuildOS: "Windows"
+      Macos:
+        imageName: "macOS-10.14"
+        conanBuildOS: "Macos"
+  pool:
+    vmImage: '$(imageName)'
+  timeoutInMinutes: 30
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: "3.x"
+      addToPath: true
+      architecture: "x64"
+
+  - script: |
+      pip install conan
+      pip install conan_package_tools
+      conan user
+    displayName: 'Install conan'
+
+  - script: python build.py
+    displayName: 'Run build'
+    env: {
+      CONAN_PRINT_RUN_COMMANDS: "True",
+      CONAN_USERNAME: "tereius",
+      CONAN_CHANNEL: "stable",
+      CONAN_BUILD_POLICY: "missing",
+      CONAN_REMOTES: "https://api.bintray.com/conan/tereius/public-conan",
+      #CONAN_UPLOAD: "https://api.bintray.com/conan/tereius/public-conan",
+      CONAN_LOGIN_USERNAME: "tereius",
+      CONAN_PASSWORD: "$(secret)",
+      CONAN_BASE_PROFILE_OSBUILD: "$(conanBuildOS)",
+      CONAN_BASE_PROFILE_ARCHBUILD: "x86_64",
+    }
